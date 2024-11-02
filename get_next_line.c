@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:33 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/01 21:49:01 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/02 16:53:59 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ int	read_into_buffer(int fd, char **buffer)
 		return (-1);
 	else if (read_status == 0)
 		return (0);
-	add_status = add_read_characters_to_buffer(buffer, read_buffer, read_status);
-	if (add_status == -1)
+	add_status = add_read_characters_to_buffer(buffer, read_buffer, (size_t)read_status);
+	if (add_status == (size_t)-1)
 		return (-1);
 	return (add_status);
 }
@@ -90,6 +90,7 @@ char	*extract_line_out_of_buffer(char **buffer, int new_line_index)
 char	*get_next_line(int fd)
 {
 	static char	**buffer;
+	static int	reached_end;
 	char		*line;
 	int			read_status;
 	int			new_line_index;
@@ -112,64 +113,67 @@ char	*get_next_line(int fd)
 		// 0 means that we reached the end of file
 		else if (read_status == 0)
 		{
-			line = extract_line_out_of_buffer(buffer, new_line_index);
-			if (line == NULL)
+			if (reached_end)
 				return (NULL);
+			reached_end = 1;
+			line = extract_line_out_of_buffer(buffer, string_length(*buffer));
+			if (line == NULL)
+				return (free(buffer), NULL);
 			free(buffer);
-			return (NULL);
+			return (line);
 		}
 	}
 	line = extract_line_out_of_buffer(buffer, new_line_index);
 	if (line == NULL)
-		return (NULL);
+		return (free(buffer), NULL);
 	return (line);
 }
 
-// int	main(void)
-// {
-// 	char	*line;
+int	main(void)
+{
+	char	*line;
 
-// 	// We read the file and get the file descriptor of it
-// 	int fd = open("file.txt", O_RDONLY);
+	// We read the file and get the file descriptor of it
+	int fd = open("file.txt", O_RDONLY);
 
-// 	while (1) {
-// 		line = get_next_line(fd);
-// 		if (line == NULL)
-// 			break ;
-// 		printf("%s", line);
-// 	}
+	while (1) {
+		line = get_next_line(fd);
+		if (line == NULL)
+			break ;
+		printf("%s", line);
+	}
 
-// 	// // Allocate memory for the buffer string, 1 means that there will be room only for the null terminator
-// 	// char *buffer_string = (char *)malloc(sizeof(char) * 1);
-// 	// // Set the null terminator
-// 	// buffer_string[0] = 0;
-// 	// // Create a buffer and assign the biffer_string's memory address for its value
-// 	// char **buffer = &buffer_string;
+	// // Allocate memory for the buffer string, 1 means that there will be room only for the null terminator
+	// char *buffer_string = (char *)malloc(sizeof(char) * 1);
+	// // Set the null terminator
+	// buffer_string[0] = 0;
+	// // Create a buffer and assign the biffer_string's memory address for its value
+	// char **buffer = &buffer_string;
 
-// 	// // Loop through 8 times
-// 	// for (int i = 0; i < 18; i++) {
-// 	// 	// You read the bytes
-// 	// 	int read_into_buffer_status = read_into_buffer(fd, buffer);
-// 	// 	// Error handling
-// 	// 	if (read_into_buffer_status == -1)
-// 	// 	{
-// 	// 		printf("read_into_buffer_status was -1\n");
-// 	// 		break;
-// 	// 	}
-// 	// 	// Print the current buffer
-// 	// 	// Check if the buffer now contains a new line
-// 	// 	int new_line_index = contains_new_line(*buffer);
-// 	// 	printf("%3d: ", new_line_index);
-// 	// 	printf("'%s'\n", *buffer);
-// 	// 	// If we DO have a new line within the buffer, cut off the line from the buffer until the new line character
-// 	// 	if (new_line_index != -1)
-// 	// 	{
-// 	// 		char *line = extract_line_out_of_buffer(buffer, new_line_index);
-// 	// 		printf("Line found: '%s'\n", line);
-// 	// 		printf("Buffer after: '%s'\n", *buffer);
-// 	// 	}
-// 	// }
+	// // Loop through 8 times
+	// for (int i = 0; i < 18; i++) {
+	// 	// You read the bytes
+	// 	int read_into_buffer_status = read_into_buffer(fd, buffer);
+	// 	// Error handling
+	// 	if (read_into_buffer_status == -1)
+	// 	{
+	// 		printf("read_into_buffer_status was -1\n");
+	// 		break;
+	// 	}
+	// 	// Print the current buffer
+	// 	// Check if the buffer now contains a new line
+	// 	int new_line_index = contains_new_line(*buffer);
+	// 	printf("%3d: ", new_line_index);
+	// 	printf("'%s'\n", *buffer);
+	// 	// If we DO have a new line within the buffer, cut off the line from the buffer until the new line character
+	// 	if (new_line_index != -1)
+	// 	{
+	// 		char *line = extract_line_out_of_buffer(buffer, new_line_index);
+	// 		printf("Line found: '%s'\n", line);
+	// 		printf("Buffer after: '%s'\n", *buffer);
+	// 	}
+	// }
 
-// 	// free(buffer_string);
-// 	return (0);
-// }
+	// free(buffer_string);
+	return (0);
+}

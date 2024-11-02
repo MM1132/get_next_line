@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:56 by rreimann          #+#    #+#             */
-/*   Updated: 2024/10/30 15:33:26 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/02 15:07:37 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,8 @@ size_t	string_length(char *str)
 // Return -1 if anything fails
 // Otherwise return the number of characters that are now in the buffer
 // We expect buffer not to be NULL
-size_t	add_read_characters_to_buffer(char **buffer, char *add_buffer, ssize_t add_buffer_length)
+size_t	add_read_characters_to_buffer(char **buffer, char *add_buffer, size_t add_buffer_length)
 {
-
 	char	*new_buffer;
 	size_t	old_buffer_length;
 	size_t	index;
