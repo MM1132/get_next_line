@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:56 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/02 15:07:37 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/03 18:37:33 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@ int	contains_new_line(char *str)
 
 	index = 0;
 	if (str == NULL)
-		return (-1);
+		return (0);
 	while (str[index] != 0)
 	{
 		if (str[index] == '\n')
 			return (index);
 		index++;
 	}
-	return (-1);
+	return (0);
 }
 
 size_t	string_length(char *str)
