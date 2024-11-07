@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:33 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/03 19:27:35 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/07 20:55:42 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,25 +16,6 @@
 #include <stdio.h>
 
 #include "get_next_line.h"
-
-// Here we pass in the pointer to the memory address,
-// So that we can change the memory this pointer is pointing to
-// int	read_into_buffer(int fd, char **buffer)
-// {
-// 	ssize_t	read_status;
-// 	char	read_buffer[BUFFER_SIZE];
-// 	size_t	add_status;
-
-// 	read_status = read(fd, read_buffer, BUFFER_SIZE);
-// 	if (read_status == -1)
-// 		return (-1);
-// 	else if (read_status == 0)
-// 		return (0);
-// 	add_status = add_read_characters_to_buffer(buffer, read_buffer, (size_t)read_status);
-// 	if (add_status == (size_t)-1)
-// 		return (-1);
-// 	return (add_status);
-// }
 
 // Return value: NULL means that something fucked up
 // We assume that *buffer is not NULL
@@ -87,113 +68,164 @@ char	*extract_line_out_of_buffer(char **buffer, int new_line_index)
 	return (line);
 }
 
-// Here we already definitely know that the buffer is defined
-// So we just get the line out of the read function
-char	*general_checking_loop(int fd, char **buffer)
+// ######################################### NEW THING
+// -1 means no new line
+// Anything else means the index of the new line
+int	main_buffer_contains_new_line(char main_buffer[BUFFER_SIZE])
+{
+	int	index;
+
+	index = 0;
+	while (index < BUFFER_SIZE)
+	{
+		if (main_buffer[index] == '\n')
+			return (index);
+		index++;
+	}
+	return (0);
+}
+
+int	temp_buffer_contains_new_line(char *temp_buffer)
+{
+	int index;
+
+	index = 0;
+	while (temp_buffer[index] != 0)
+	{
+		if (temp_buffer[index] == '\n')
+			return (index);
+		index++;
+	}
+	return (0);
+}
+
+char	*add_buffers(char main_buffer[BUFFER_SIZE], char *temp_buffer)
+{
+	char	*new_buffer;
+	int		main_buffer_new_line;
+	int		temp_buffer_new_line;
+	int		main_buffer_index;
+	int		temp_buffer_index;
+
+	//! This could lead to an error, because if the main buffer has no new line, the return will be 0
+	main_buffer_new_line = main_buffer_contains_new_line(main_buffer);
+	temp_buffer_new_line = temp_buffer_contains_new_line(temp_buffer);
+	// "123\n0000" -> 3
+	// "adadad\n" -> 6
+	new_buffer = (char *)malloc(sizeof(char) * (main_buffer_new_line + temp_buffer_new_line + 1));
+	if (new_buffer == NULL)
+		return (NULL);
+	main_buffer_index = 0;
+	while (main_buffer_index < main_buffer_new_line)
+	{
+		new_buffer[main_buffer_index] = main_buffer[main_buffer_index];
+		main_buffer_index++;
+	}
+	temp_buffer_index = 0;
+	while (temp_buffer_index < temp_buffer_new_line)
+	{
+		new_buffer[main_buffer_index + temp_buffer_index] = temp_buffer[temp_buffer_index];
+		temp_buffer_index++;
+	}
+	new_buffer[main_buffer_index + temp_buffer_index] = 0;
+	return (new_buffer);
+}
+
+int	set_everything_after_first_line_into_main_buffer(char main_buffer[BUFFER_SIZE], char *added_buffers)
+{
+	int	main_buffer_index;
+
+	main_buffer_index = 0;
+	while (main_buffer_index < BUFFER_SIZE)
+	{
+
+	}
+}
+
+char	*compose_line_from_buffers(char main_buffer[BUFFER_SIZE], char *temp_buffer)
+{
+	char	*added_buffers;
+	char	*line;
+	int		main_buffer_set_result;
+
+	printf("main_buffer: '%s'\n", main_buffer);
+	printf("temp_buffer: '%s'\n", temp_buffer);
+	
+	// 1. Add main_buffer and temp_buffer together into one string
+	added_buffers = add_buffers(main_buffer, temp_buffer);
+	if (added_buffers == NULL)
+		return (NULL);
+	// 2. Get the line out of that string until the \n character
+	line = extract_first_line(added_buffers);
+	if (line == NULL)
+		return (free(added_buffers), NULL);
+	// 3. Keep the remaining characters in the main_buffer
+	main_buffer_set_result = set_everything_after_first_line_into_main_buffer(main_buffer, added_buffers);
+	if (main_buffer_set_result == -1)
+		return (free(added_buffers), NULL);
+	free(added_buffers);
+	return (line);
+}
+
+// Buffer is a pointer to an array of length BUFFER_SIZE
+// We don't need to allocate to it because we already know that it is defined anyway
+char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 {
 	char	read_buffer[BUFFER_SIZE];
+	char	*temp_buffer;
+	char	*line;
 	ssize_t	read_status;
 	size_t	add_status;
 
+	temp_buffer = (char *)malloc(sizeof(char));
+	if (temp_buffer == NULL)
+		return (NULL);
+	temp_buffer[0] = 0;
 	while (1)
 	{
-		printf("Start of while\n");
-		if (buffer == NULL)
+		printf(" - While loop starting\n");
+		if (main_buffer_contains_new_line(main_buffer) || temp_buffer_contains_new_line(temp_buffer))
 		{
-			printf("Buffer is NULL\n");
-			read_status = read(fd, read_buffer, BUFFER_SIZE);
-			if (read_status == 0 || read_status == -1)
-				return (NULL);
-			buffer = (char **)malloc(sizeof(char *));
-			if (buffer == NULL)
-				return (NULL);
-			*buffer = 0;
-			add_status = add_read_characters_to_buffer(buffer, read_buffer, (size_t)read_status);
-			if (add_status == (size_t)-1)
-				return (free(buffer), NULL);
+			printf(" - Either of the buffers contains a new line\n");
+			line = compose_line_from_buffers(main_buffer, temp_buffer);
+			return (free(temp_buffer), line);
 		}
-		else if (contains_new_line(*buffer))
+		else // if we don't have a new line in either buffer, read in something new with the read() function
 		{
-			char *line = extract_line_out_of_buffer(buffer, contains_new_line(*buffer));
-			printf("Buffer after cut: '%s'\n", *buffer);
-			return (line);
-		}
-		else
-		{
-			printf("Buffer in else: '%s'\n", *buffer);
+			printf(" - Buffers didn't contain new lines, reading...\n");
 			read_status = read(fd, read_buffer, BUFFER_SIZE);
-			if (read_status == 0)
+			if (read_status == 0) // we read nothing new
 			{
-				if (string_length(*buffer) == 0)
-					return (free(buffer), NULL);
-				return (extract_line_out_of_buffer(buffer, string_length(*buffer)));
+				printf(" - We read 0 bytes\n");
+				// This function will automatically return NULL if buffer is empty
+				return (compose_line_from_buffers(main_buffer, NULL));
 			}
-			else if (read_status == -1)
-				return (free(buffer), NULL);
-			add_status = add_read_characters_to_buffer(buffer, read_buffer, (size_t)read_status);
+			if (read_status == -1) // in case of a read error
+			{
+				printf(" - There was a read error\n");
+				return (free(temp_buffer), NULL);
+			}
+			// But if everything went according to the plan
+			// Then we take whatever we read and add it to the *temp_buffer
+			add_status = add_read_characters_to_buffer(&temp_buffer, read_buffer, (size_t)read_status);
 			if (add_status == (size_t)-1)
-				return (free(buffer), NULL);
+				return (free(temp_buffer), NULL);
+			printf(" - Addig to the temp_buffer worked\n");
+			printf(":temp_buffer: '%s'\n", temp_buffer);
+			
+			// Then we can simply go for the cycle again
 		}
 	}
+	return (free(temp_buffer), NULL);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	**buffer;
+	static char	main_buffer[BUFFER_SIZE];
 	char		*line;
 
-	line = general_checking_loop(fd, buffer);
-	printf("Buffer after line return: '%s'\n", *buffer);
+	line = general_checking_loop(fd, main_buffer);
 	if (line == NULL)
 		return (NULL);
 	return (line);
-}
-
-int	main(void)
-{
-	char	*line;
-
-	// We read the file and get the file descriptor of it
-	int fd = open("file.txt", O_RDONLY);
-
-	while (1) {
-		line = get_next_line(fd);
-		if (line == NULL)
-			break ;
-		printf("Line found: '%s'", line);
-	}
-
-	// // Allocate memory for the buffer string, 1 means that there will be room only for the null terminator
-	// char *buffer_string = (char *)malloc(sizeof(char) * 1);
-	// // Set the null terminator
-	// buffer_string[0] = 0;
-	// // Create a buffer and assign the biffer_string's memory address for its value
-	// char **buffer = &buffer_string;
-
-	// // Loop through 8 times
-	// for (int i = 0; i < 18; i++) {
-	// 	// You read the bytes
-	// 	int read_into_buffer_status = read_into_buffer(fd, buffer);
-	// 	// Error handling
-	// 	if (read_into_buffer_status == -1)
-	// 	{
-	// 		printf("read_into_buffer_status was -1\n");
-	// 		break;
-	// 	}
-	// 	// Print the current buffer
-	// 	// Check if the buffer now contains a new line
-	// 	int new_line_index = contains_new_line(*buffer);
-	// 	printf("%3d: ", new_line_index);
-	// 	printf("'%s'\n", *buffer);
-	// 	// If we DO have a new line within the buffer, cut off the line from the buffer until the new line character
-	// 	if (new_line_index != -1)
-	// 	{
-	// 		char *line = extract_line_out_of_buffer(buffer, new_line_index);
-	// 		printf("Line found: '%s'\n", line);
-	// 		printf("Buffer after: '%s'\n", *buffer);
-	// 	}
-	// }
-
-	// free(buffer_string);
-	return (0);
 }
