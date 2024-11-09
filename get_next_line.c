@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:33 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/07 20:55:42 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/09 16:30:17 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,37 +66,6 @@ char	*extract_line_out_of_buffer(char **buffer, int new_line_index)
 	if (*buffer == NULL)
 		return (free(line), NULL);
 	return (line);
-}
-
-// ######################################### NEW THING
-// -1 means no new line
-// Anything else means the index of the new line
-int	main_buffer_contains_new_line(char main_buffer[BUFFER_SIZE])
-{
-	int	index;
-
-	index = 0;
-	while (index < BUFFER_SIZE)
-	{
-		if (main_buffer[index] == '\n')
-			return (index);
-		index++;
-	}
-	return (0);
-}
-
-int	temp_buffer_contains_new_line(char *temp_buffer)
-{
-	int index;
-
-	index = 0;
-	while (temp_buffer[index] != 0)
-	{
-		if (temp_buffer[index] == '\n')
-			return (index);
-		index++;
-	}
-	return (0);
 }
 
 char	*add_buffers(char main_buffer[BUFFER_SIZE], char *temp_buffer)
@@ -167,8 +136,6 @@ char	*compose_line_from_buffers(char main_buffer[BUFFER_SIZE], char *temp_buffer
 	return (line);
 }
 
-// Buffer is a pointer to an array of length BUFFER_SIZE
-// We don't need to allocate to it because we already know that it is defined anyway
 char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 {
 	char	read_buffer[BUFFER_SIZE];
@@ -180,14 +147,14 @@ char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 	temp_buffer = (char *)malloc(sizeof(char));
 	if (temp_buffer == NULL)
 		return (NULL);
-	temp_buffer[0] = 0;
+	temp_buffer[0] = 0; // Set the null terminator for the empty string
 	while (1)
 	{
 		printf(" - While loop starting\n");
-		if (main_buffer_contains_new_line(main_buffer) || temp_buffer_contains_new_line(temp_buffer))
+		if (get_new_line_index(main_buffer, BUFFER_SIZE) != -1 || get_new_line_index(temp_buffer, string_length(temp_buffer) != -1))
 		{
 			printf(" - Either of the buffers contains a new line\n");
-			line = compose_line_from_buffers(main_buffer, temp_buffer);
+			line = compose_line_from_buffers(&main_buffer, temp_buffer);
 			return (free(temp_buffer), line);
 		}
 		else // if we don't have a new line in either buffer, read in something new with the read() function

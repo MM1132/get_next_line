@@ -6,26 +6,26 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:56 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/03 18:37:33 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/09 16:27:21 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	contains_new_line(char *str)
+int	get_new_line_index(char *str, int len)
 {
 	int	index;
 
 	index = 0;
 	if (str == NULL)
-		return (0);
-	while (str[index] != 0)
+		return (-1);
+	while (index < len)
 	{
 		if (str[index] == '\n')
 			return (index);
 		index++;
 	}
-	return (0);
+	return (-1);
 }
 
 size_t	string_length(char *str)

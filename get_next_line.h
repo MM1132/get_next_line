@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:58 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/02 15:07:44 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/09 16:27:35 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include <unistd.h>
 
 char	*get_next_line(int fd);
-int		contains_new_line(char *str);
+int		get_new_line_index(char *str, int len);
 size_t	string_length(char *str);
 size_t	add_read_characters_to_buffer(char **buffer, char *add_buffer, size_t add_buffer_length);
 
