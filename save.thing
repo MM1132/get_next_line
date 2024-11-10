@@ -6,7 +6,7 @@
 #    By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/28 13:21:33 by rreimann          #+#    #+#              #
-#    Updated: 2024/11/10 16:26:25 by rreimann         ###   ########.fr        #
+#    Updated: 2024/11/10 16:55:11 by rreimann         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -117,8 +117,8 @@ char	*compose_line_from_buffers(char *main_buffer[BUFFER_SIZE], char *temp_buffe
 	char	*line;
 	int		main_buffer_set_result;
 
-	//printf("main_buffer: '%s'\n", main_buffer);
-	//printf("temp_buffer: '%s'\n", temp_buffer);
+	printf("main_buffer: '%s'\n", main_buffer);
+	printf("temp_buffer: '%s'\n", temp_buffer);
 	
 	// 1. Add main_buffer and temp_buffer together into one string
 	added_buffers = add_buffers(main_buffer, temp_buffer);
@@ -150,11 +150,11 @@ char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 	temp_buffer[0] = 0;
 	while (1)
 	{
-		//printf(" - While loop starting\n");
+		printf(" - While loop starting\n");
 		if (get_new_line_index(main_buffer, BUFFER_SIZE) != -1 ||\
 			get_new_line_index(temp_buffer, string_length(temp_buffer) != -1))
 		{
-			//printf(" - Either of the buffers contains a new line\n");
+			printf(" - Either of the buffers contains a new line\n");
 			// line = compose_line_from_buffers(&main_buffer, temp_buffer);
 			// return (free(temp_buffer), line);
 			
@@ -162,17 +162,17 @@ char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 		}
 		else // if we don't have a new line in either buffer, read in something new with the read() function
 		{
-			//printf(" - Buffers didn't contain new lines, reading...\n");
+			printf(" - Buffers didn't contain new lines, reading...\n");
 			read_status = read(fd, read_buffer, BUFFER_SIZE);
 			if (read_status == 0) // we read nothing new
 			{
-				//printf(" - We read 0 bytes\n");
+				printf(" - We read 0 bytes\n");
 				// This function will automatically return NULL if buffer is empty
 				return (compose_line_from_buffers(main_buffer, NULL));
 			}
 			if (read_status == -1) // in case of a read error
 			{
-				//printf(" - There was a read error\n");
+				printf(" - There was a read error\n");
 				return (free(temp_buffer), NULL);
 			}
 			// But if everything went according to the plan
@@ -180,8 +180,8 @@ char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 			add_status = add_read_characters_to_buffer(&temp_buffer, read_buffer, (size_t)read_status);
 			if (add_status == (size_t)-1)
 				return (free(temp_buffer), NULL);
-			//printf(" - Addig to the temp_buffer worked\n");
-			//printf(":temp_buffer: '%s'\n", temp_buffer);
+			printf(" - Addig to the temp_buffer worked\n");
+			printf(":temp_buffer: '%s'\n", temp_buffer);
 			
 			// Then we can simply go for the cycle again
 		}

@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:56 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/10 16:26:54 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/10 16:54:53 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,26 +87,35 @@ size_t	add_read_characters_to_buffer(char **buffer, char *add_buffer, size_t add
 
 static void	set_remaining_buffer(char main_buffer[BUFFER_SIZE], char *temp_buffer)
 {
-	int		new_line_index;
-	int		temp_buffer_length;
-	int		index;
+	int	main_new_line_index;
+	int	temp_new_line_index;
+	int	temp_buffer_length;
+	int	index;
 
+	main_new_line_index = get_new_line_index(main_buffer, BUFFER_SIZE);
 	index = 0;
-	while (index < BUFFER_SIZE)
-		main_buffer[index++] = 0;
-	temp_buffer_length = string_length(temp_buffer, -1);
-	new_line_index = get_new_line_index(temp_buffer, temp_buffer_length);
-	if (new_line_index == -1)
-		new_line_index = temp_buffer_length - 1;
-	index = 0;
-	// "Thank you for this amazing evaluation\nIt w" => 37, length: 42
-	//printf(" - Setting remaining characters for the main_buffer...\n");
-	while (index + new_line_index + 1 < temp_buffer_length)
+	while (main_new_line_index != -1 && index + main_new_line_index + 1 < BUFFER_SIZE)
 	{
-		//printf(":temp_buffer[%d]: %c\n", index, temp_buffer[index + new_line_index + 1]);
-		main_buffer[index] = temp_buffer[index + new_line_index + 1];
+		main_buffer[index] = main_buffer[index + main_new_line_index + 1];
 		index++;
 	}
+	//printf(":main_buffer 1: '%s'\n", main_buffer);
+	temp_buffer_length = string_length(temp_buffer, -1);
+	temp_new_line_index = get_new_line_index(temp_buffer, temp_buffer_length);
+	if (temp_new_line_index == -1)
+		temp_new_line_index = temp_buffer_length - 1;
+	// "Thank you for this amazing evaluation\nIt w" => 37, length: 42
+	//printf(" - Setting remaining characters for the main_buffer...\n");
+	while (index + temp_new_line_index + 1 < temp_buffer_length)
+	{
+		//printf(":temp_buffer[%d]: %c\n", index, temp_buffer[index + temp_new_line_index + 1]);
+		main_buffer[index] = temp_buffer[index + temp_new_line_index + 1];
+		index++;
+	}
+	//printf(":main_buffer 2: '%s'\n", main_buffer);
+	while (index < BUFFER_SIZE)
+		main_buffer[index++] = 0;
+	//printf(":main_buffer 3: '%s'\n", main_buffer);
 }
 
 // This should put the two buffers together and return the line
@@ -132,8 +141,7 @@ char	*compose_line_from_buffers(char main_buffer[BUFFER_SIZE], char *temp_buffer
 	if (main_new_line_index != -1)
 	{
 		add_read_characters_to_buffer(&line, main_buffer, main_new_line_index + 1);
-		// Zero out the main buffer
-		main_buffer[main_new_line_index] = 0;
+		set_remaining_buffer(main_buffer, temp_buffer);
 		return (line);
 	}
 	else if (temp_new_line_index != -1)

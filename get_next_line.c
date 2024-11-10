@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:33 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/10 16:26:14 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/10 16:58:06 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,10 +81,16 @@ static char	*general_checking_loop(int fd, char main_buffer[BUFFER_SIZE])
 char	*get_next_line(int fd)
 {
 	static char	main_buffer[BUFFER_SIZE];
+	int			index;
 	char		*line;
 
 	line = general_checking_loop(fd, main_buffer);
 	if (line == NULL)
+	{
+		index = 0;
+		while (index < BUFFER_SIZE)
+			main_buffer[index++] = 0;
 		return (NULL);
+	}
 	return (line);
 }
