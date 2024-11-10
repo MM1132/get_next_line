@@ -6,7 +6,7 @@
 /*   By: rreimann <rreimann@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:21:56 by rreimann          #+#    #+#             */
-/*   Updated: 2024/11/10 17:54:26 by rreimann         ###   ########.fr       */
+/*   Updated: 2024/11/10 17:57:18 by rreimann         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,11 @@ size_t	add_to_buffer(char **buffer,
 	if (new_buffer == NULL)
 		return (-1);
 	index = 0;
-	while (new_buffer[index] = (*buffer)[index], index < old_buffer_length)
+	while (index < old_buffer_length)
+	{
+		new_buffer[index] = (*buffer)[index];
 		index++;
+	}
 	index = 0;
 	while (index < add_buffer_length)
 	{
